@@ -15,7 +15,6 @@
         android:padding="20dp"
         app:TimeScrollerView_corner_radius="60"
         app:TimeScrollerView_rect_color="#242847"
-        app:TimeScrollerView_scroller_color="@color/purple_200"
         app:TimeScrollerView_scroller_corner_radius="5" />
 
     <androidx.appcompat.widget.AppCompatButton

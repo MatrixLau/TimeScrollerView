@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -14,7 +15,7 @@ public class TimeScrollerView extends View {
 
     // 设置画笔变量
     Paint circlePaint, cornerRadiusPaint, rectPaint, scrollerPaint, scrollerRailPaint, scaleTextPaint, linePaint;
-
+    Path backgroundPath;
     private String TAG = getClass().getSimpleName();
     private int circleColor = Color.RED;
     private int rectColor = Color.GRAY;
@@ -88,6 +89,9 @@ public class TimeScrollerView extends View {
 
     // 画笔初始化
     private void init() {
+
+        //画布限制Path
+        backgroundPath = new Path();
 
         // 创建圆形画笔
         circlePaint = new Paint();
@@ -176,29 +180,30 @@ public class TimeScrollerView extends View {
 
         float rollerRail = scrollerRailWidth == -1 ? height / 5f : scrollerRailWidth;
 
+        //画背景限制画布
+        backgroundPath.addRoundRect(paddingLeft, paddingTop, getWidth() - paddingRight, getHeight() - paddingBottom, cornerRadius, cornerRadius, Path.Direction.CW);
+        backgroundPath.close();
+        canvas.clipPath(backgroundPath);
+
         //画出背景长方形
         canvas.drawRoundRect(paddingLeft, paddingTop, getWidth() - paddingRight, getHeight() - paddingBottom, cornerRadius, cornerRadius, rectPaint);
 
-        float linePadding = width / 18f;
-        lineGap = (width - cornerRadius * 2) / 22f;
+        float linePadding = width / 20f;
+        lineGap = width / 24f;
         int lineCount = 0;
 
         //画刻度线
-        for (int i = 1; i <= 24; i++) {
-            if (i == 1) {
-                canvas.drawLine(paddingLeft + cornerRadius, paddingTop + linePadding / 2, paddingLeft + cornerRadius, height + paddingTop - linePadding / 2, linePaint);
-            } else if (i == 24) {
-                canvas.drawLine(width + paddingRight - cornerRadius, paddingTop + linePadding / 2, width + paddingRight - cornerRadius, height + paddingTop - linePadding / 2, linePaint);
-            } else {
-                canvas.drawLine(paddingLeft + cornerRadius + (i - 1) * lineGap, paddingTop + linePadding / 2, paddingRight + cornerRadius + (i - 1) * lineGap, height + paddingTop - linePadding / 2, linePaint);
-            }
+        for (int i = 1; i < 24; i++) {
+
+            canvas.drawLine(paddingLeft + i * lineGap, paddingTop + linePadding / 2, paddingRight + i * lineGap, height + paddingTop - linePadding / 2, linePaint);
+
             lineCount++;
 
             //画刻度数字
             if (lineCount % 3 == 0 && lineCount != 24) {
                 float textWidth = scaleTextPaint.measureText(String.valueOf(lineCount)) * 0.5f;
                 float lineLength = (height - lineGap) / 10f;
-                canvas.drawText(String.valueOf(lineCount), paddingLeft + cornerRadius + (i - 2) * lineGap + lineGap / 2 - textWidth, height + paddingTop - linePadding / 2 - lineLength, scaleTextPaint);
+                canvas.drawText(String.valueOf(lineCount), paddingLeft + (i - 1) * lineGap + lineGap / 2 - textWidth, height + paddingTop - linePadding / 2 - lineLength, scaleTextPaint);
             }
 
         }
@@ -209,12 +214,7 @@ public class TimeScrollerView extends View {
         //计算开始位置
 //        int timeSectionStartPosition = 24;
         float timeSectionStartWidth = 0f;
-        if (timeSectionStartPosition >= 1) {
-            timeSectionStartWidth += cornerRadius;
-        }
-        if (timeSectionStartPosition >= 2) {
-            timeSectionStartWidth += (timeSectionStartPosition - 1) * lineGap;
-        }
+        timeSectionStartWidth = timeSectionStartPosition * lineGap;
 
         //计算滑轮长度
 //        int timeSectionCount = 6;
@@ -224,24 +224,13 @@ public class TimeScrollerView extends View {
             timeSectionWidth = 0f;
         } else if (timeSectionCount == 24) {
             timeSectionWidth = width;
-        } else if (timeSectionCount == 1 && timeSectionStartPosition == 0) {
-            timeSectionWidth = cornerRadius;
         } else if (timeSectionStartPosition + timeSectionCount <= 24) {
-            int specialMethod = 0;
-            if (timeSectionStartPosition == 0) {
-                timeSectionWidth += cornerRadius;
-                specialMethod++;
-            }
-            if (timeSectionStartPosition + timeSectionCount == 24) {
-                timeSectionWidth += cornerRadius;
-                specialMethod++;
-            }
-            timeSectionWidth += (timeSectionCount - specialMethod) * lineGap;
+            timeSectionWidth = timeSectionCount * lineGap;
         } else if (timeSectionStartPosition + timeSectionCount > 24) {
             int todaySection = 24 - timeSectionStartPosition;
-            float todaySectionWidth = cornerRadius + (todaySection - 1) * lineGap;
+            float todaySectionWidth = todaySection * lineGap;
             int sectionsLeft = timeSectionStartPosition + timeSectionCount - 24;
-            float sectionsLeftWidth = cornerRadius + (sectionsLeft - 1) * lineGap;
+            float sectionsLeftWidth = sectionsLeft * lineGap;
             timeSectionWidth = todaySectionWidth + sectionsLeftWidth;
         }
 
