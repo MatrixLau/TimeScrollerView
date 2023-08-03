@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="TimeScrollerView">
+        <attr name="TimeScrollerView_circle_color" format="color" />
+        <attr name="TimeScrollerView_rect_color" format="color" />
+        <attr name="TimeScrollerView_corner_radius" format="float" />
+        <attr name="TimeScrollerView_scroller_rail_width" format="float" />
+        <attr name="TimeScrollerView_scroller_color" format="color" />
+        <attr name="TimeScrollerView_scroller_rail_color" format="color" />
+        <attr name="TimeScrollerView_line_color" format="color" />
+        <attr name="TimeScrollerView_line_stroke" format="float" />
+        <attr name="TimeScrollerView_scroller_corner_radius" format="float" />
+    </declare-styleable>
+
+</resources>
