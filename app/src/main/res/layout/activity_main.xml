@@ -13,9 +13,9 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:padding="20dp"
-        app:TimeScrollerView_corner_radius="60"
+        app:TimeScrollerView_corner_radius="20dp"
         app:TimeScrollerView_rect_color="#242847"
-        app:TimeScrollerView_scroller_corner_radius="5" />
+        app:TimeScrollerView_scroller_corner_radius="1dp" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/timeSectionButton"

@@ -9,6 +9,7 @@ import android.graphics.Path;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 
 public class TimeScrollerView extends View {
@@ -19,17 +20,17 @@ public class TimeScrollerView extends View {
     private String TAG = getClass().getSimpleName();
     private int circleColor = Color.RED;
     private int rectColor = Color.GRAY;
-    private float cornerRadius = 0f;
-    private float scrollerRailWidth = -1f;
+    private float cornerRadius = getDp(0);
+    private float scrollerRailWidth = -getDp(10);
     private int scrollerColor = Color.WHITE;
     private int scrollerRailColor = Color.BLACK;
     private int lineColor = 0xff424A7A;
-    private float lineStroke = 4f;
+    private float lineStroke = getDp(2);
     private float lineGap;
 
     private int timeSectionCount = 0;
     private int timeSectionStartPosition = 0;
-    private float scrollerCornerRadius = 0f;
+    private float scrollerCornerRadius = getDp(0);
 
     // 自定义View有四个构造函数
     // 如果View是在Java代码里面new的，则调用第一个构造函数
@@ -54,14 +55,14 @@ public class TimeScrollerView extends View {
         // 将解析的属性传入到画圆的画笔颜色变量当中（本质上是自定义画圆画笔的颜色）
         // 第二个参数是默认设置颜色（即无指定circle_color情况下使用）
         circleColor = a.getColor(R.styleable.TimeScrollerView_TimeScrollerView_circle_color, circleColor);
-        cornerRadius = a.getFloat(R.styleable.TimeScrollerView_TimeScrollerView_corner_radius, cornerRadius);
+        cornerRadius = a.getDimension(R.styleable.TimeScrollerView_TimeScrollerView_corner_radius, cornerRadius);
         rectColor = a.getColor(R.styleable.TimeScrollerView_TimeScrollerView_rect_color, rectColor);
-        scrollerRailWidth = a.getFloat(R.styleable.TimeScrollerView_TimeScrollerView_scroller_rail_width, scrollerRailWidth);
+        scrollerRailWidth = a.getDimension(R.styleable.TimeScrollerView_TimeScrollerView_scroller_rail_width, scrollerRailWidth);
         scrollerColor = a.getColor(R.styleable.TimeScrollerView_TimeScrollerView_scroller_color, scrollerColor);
         scrollerRailColor = a.getColor(R.styleable.TimeScrollerView_TimeScrollerView_scroller_rail_color, scrollerRailColor);
         lineColor = a.getColor(R.styleable.TimeScrollerView_TimeScrollerView_line_color, lineColor);
-        lineStroke = a.getFloat(R.styleable.TimeScrollerView_TimeScrollerView_line_stroke, lineStroke);
-        scrollerCornerRadius = a.getFloat(R.styleable.TimeScrollerView_TimeScrollerView_scroller_corner_radius, scrollerCornerRadius);
+        lineStroke = a.getDimension(R.styleable.TimeScrollerView_TimeScrollerView_line_stroke, lineStroke);
+        scrollerCornerRadius = a.getDimension(R.styleable.TimeScrollerView_TimeScrollerView_scroller_corner_radius, scrollerCornerRadius);
 
         // 解析后释放资源
         a.recycle();
@@ -283,5 +284,15 @@ public class TimeScrollerView extends View {
     public void setTimeSectionStartPosition(int timeSectionStartPosition) {
         this.timeSectionStartPosition = timeSectionStartPosition;
         invalidate();
+    }
+
+    /**
+     * 获取统一化像素大小
+     *
+     * @param dp 传入的值
+     * @return 转化成统一标准的值
+     */
+    public float getDp(int dp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
     }
 }
