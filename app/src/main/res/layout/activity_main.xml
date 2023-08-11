@@ -9,13 +9,13 @@
     <RelativeLayout
         android:id="@+id/scroller"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="200dp"
         android:padding="20dp">
 
         <com.ma.timescrollerview.TimeScrollerView
             android:id="@+id/timeScroller"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="80dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             app:TimeScrollerView_corner_radius="20dp"
@@ -24,7 +24,18 @@
 
         <com.ma.timescrollerview.TimeScrollerIndicatorView
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="80dp"
+            app:TimeScrollerIndicatorView_stroke_width="8dp" />
+
+        <com.ma.timescrollerview.TimeScroller
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_below="@+id/timeScroller"
+            android:layout_marginTop="10dp"
+            app:TimeScrollerIndicatorView_stroke_width="5dp"
+            app:TimeScrollerView_corner_radius="20dp"
+            app:TimeScrollerView_rect_color="#242847"
+            app:TimeScrollerView_scroller_corner_radius="1dp" />
     </RelativeLayout>
 
 

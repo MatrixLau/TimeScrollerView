@@ -13,4 +13,8 @@
         <attr name="TimeScrollerView_scroller_corner_radius" format="dimension" />
     </declare-styleable>
 
+    <declare-styleable name="TimeScrollerIndicatorView">
+        <attr name="TimeScrollerIndicatorView_stroke_width" format="dimension" />
+    </declare-styleable>
+
 </resources>
