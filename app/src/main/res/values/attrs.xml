@@ -15,6 +15,7 @@
 
     <declare-styleable name="TimeScrollerIndicatorView">
         <attr name="TimeScrollerIndicatorView_stroke_width" format="dimension" />
+        <attr name="TimeScrollerIndicatorView_indicator_color" format="color" />
     </declare-styleable>
 
 </resources>
