@@ -23,6 +23,7 @@
             app:TimeScrollerView_scroller_corner_radius="1dp" />
 
         <com.ma.timescrollerview.TimeScrollerIndicatorView
+            android:id="@+id/indicator"
             android:layout_width="match_parent"
             android:layout_height="80dp"
             app:TimeScrollerIndicatorView_indicator_color="@color/teal_200"

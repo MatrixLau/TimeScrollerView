@@ -5,26 +5,41 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PointF;
+import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 
 public class TimeScrollerIndicatorView extends View {
 
-    String TAG = getClass().getSimpleName();
+    private String TAG = getClass().getSimpleName();
 
-    Paint indicatorPaint;
+    private Paint indicatorPaint;
 
-    int indicatorColor = Color.BLUE;
-    float indicatorStrokeWidth = getDp(10);
-    float widthPerMin = 0f;
-    int hour = 2;
-    int min = 19;
+    private int indicatorColor = Color.BLUE;
+    private float indicatorStrokeWidth = getDp(10);
+    private float widthPerMin = 0f;
+    private int hour = 2;
+    private int min = 19;
+    private PointF startPoint = new PointF();
+    private PointF endPoint = new PointF();
 
-    View.OnDragListener dragListener;
-    OnClickListener clickListener;
+    private boolean isMoving = false;
+    private boolean isInit = true;
+
+    private Handler initHandler = new Handler();
+    private Runnable initTask = new Runnable() {
+        @Override
+        public void run() {
+            isInit = true;
+            invalidate();
+        }
+    };
 
     public TimeScrollerIndicatorView(Context context) {
         super(context);
@@ -80,7 +95,13 @@ public class TimeScrollerIndicatorView extends View {
             additionWidth += ((hour * 60) + min) * widthPerMin;
         }
 
-        canvas.drawLine(paddingLeft + additionWidth, paddingTop, paddingLeft + additionWidth, paddingTop + height, indicatorPaint);
+        if (isInit) {
+            startPoint.set(paddingLeft + additionWidth, paddingTop);
+            endPoint.set(paddingLeft + additionWidth, paddingTop + height);
+            isInit = false;
+        }
+
+        canvas.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, indicatorPaint);
 
     }
 
@@ -100,21 +121,28 @@ public class TimeScrollerIndicatorView extends View {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
     }
 
-//    public static abstract interface View.OnDragListener {
-//        public abstract void onDrag();
-//    }
 
-    public static abstract interface OnClickListener {
-
-        public abstract void onClick(); //单击事件处理接口
-
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (isMoving) {
+            startPoint.x = event.getX(0);
+            endPoint.x = event.getX(0);
+            invalidate();
+        }
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            isMoving = false;
+            initHandler.removeCallbacks(initTask);
+            initHandler.postDelayed(initTask, 5000);
+            return false;
+        }
+        //点击到标记线
+        if (event.getX(0) >= startPoint.x - indicatorStrokeWidth / 2f && event.getX(0) <= startPoint.x + indicatorStrokeWidth / 2f
+                && event.getY(0) >= startPoint.y && event.getY(0) <= endPoint.y) {
+            Log.w(TAG, "onTouchEvent: " + event.toString());
+            if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                isMoving = true;
+            }
+        }
+        return true;
     }
-
-//    public void setOnClickListener(OnClickListener  listener){
-//
-//        this.clickListener = listener;   //引用监听器类对象,在这里可以使用监听器类的对象
-//
-//    }
-
-
 }
