@@ -25,6 +25,7 @@
         <com.ma.timescrollerview.TimeScrollerIndicatorView
             android:layout_width="match_parent"
             android:layout_height="80dp"
+            app:TimeScrollerIndicatorView_indicator_color="@color/teal_200"
             app:TimeScrollerIndicatorView_stroke_width="8dp" />
 
         <com.ma.timescrollerview.TimeScroller
@@ -32,9 +33,10 @@
             android:layout_height="200dp"
             android:layout_below="@+id/timeScroller"
             android:layout_marginTop="10dp"
-            app:TimeScrollerIndicatorView_stroke_width="5dp"
+            app:TimeScrollerIndicatorView_indicator_color="#7f00ff00"
             app:TimeScrollerView_corner_radius="20dp"
             app:TimeScrollerView_rect_color="#242847"
+            app:TimeScrollerIndicatorView_stroke_width="8dp"
             app:TimeScrollerView_scroller_corner_radius="1dp" />
     </RelativeLayout>
 

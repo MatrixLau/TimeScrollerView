@@ -23,6 +23,9 @@ public class TimeScrollerIndicatorView extends View {
     int hour = 2;
     int min = 19;
 
+    View.OnDragListener dragListener;
+    OnClickListener clickListener;
+
     public TimeScrollerIndicatorView(Context context) {
         super(context);
         init();
@@ -96,4 +99,22 @@ public class TimeScrollerIndicatorView extends View {
     public float getDp(int dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
     }
+
+//    public static abstract interface View.OnDragListener {
+//        public abstract void onDrag();
+//    }
+
+    public static abstract interface OnClickListener {
+
+        public abstract void onClick(); //单击事件处理接口
+
+    }
+
+//    public void setOnClickListener(OnClickListener  listener){
+//
+//        this.clickListener = listener;   //引用监听器类对象,在这里可以使用监听器类的对象
+//
+//    }
+
+
 }
