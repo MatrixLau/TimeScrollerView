@@ -29,12 +29,13 @@ public class TimeScrollerIndicatorView extends View {
     private int min = 19;
     private PointF startPoint = new PointF();
     private PointF endPoint = new PointF();
+    private PointF newPoint = new PointF();
 
     private boolean isMoving = false;
     private boolean isInit = true;
 
     private float rollBackSpeed = 12f;
-    private Handler initHandler = new Handler();
+    private Handler handler = new Handler();
     private Runnable initTask = new Runnable() {
         @Override
         public void run() {
@@ -44,8 +45,43 @@ public class TimeScrollerIndicatorView extends View {
             }
         }
     };
+    private long indicatorRestoreTime = 3000;
+    private boolean isOnClock = false;
+    private Runnable onClockTask = new Runnable() {
+        @Override
+        public void run() {
+//            Log.e(TAG, "run: isOnClock:"+isOnClock);
+            if (++min >= 60) {
+                min = 0;
+                hour++;
+            }
+            hour = hour >= 24 ? 0 : hour;
+            if (!isMoving) {
+                isInit = true;
+                invalidate();
+
+            }
+            if (isOnClock) {
+                handler.postDelayed(onClockTask, runClockTime);
+            }
+        }
+    };
 
     private float canvasBorder = getDp(0);
+    private int tmpHour = -1;
+    private int tmpMin = -1;
+    private long runClockTime = 100;
+
+    public void init() {
+        indicatorPaint = new Paint();
+        indicatorPaint.setColor(indicatorColor);
+        indicatorPaint.setStrokeWidth(indicatorStrokeWidth);
+        indicatorPaint.setAntiAlias(true);
+
+        if (isOnClock) {
+            handler.postDelayed(onClockTask, runClockTime);
+        }
+    }
 
     public TimeScrollerIndicatorView(Context context) {
         super(context);
@@ -74,13 +110,6 @@ public class TimeScrollerIndicatorView extends View {
         init();
     }
 
-    public void init() {
-        indicatorPaint = new Paint();
-        indicatorPaint.setColor(indicatorColor);
-        indicatorPaint.setStrokeWidth(indicatorStrokeWidth);
-        indicatorPaint.setAntiAlias(true);
-    }
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -93,6 +122,7 @@ public class TimeScrollerIndicatorView extends View {
         int width = getWidth() - paddingLeft - paddingRight;
         int height = getHeight() - paddingTop - paddingBottom;
 
+        backgroundPath.reset();   //不reset会导致画布闪烁
         backgroundPath.addRoundRect(paddingLeft, paddingTop, getWidth() - paddingRight, getHeight() - paddingBottom, canvasBorder, canvasBorder, Path.Direction.CW);
         backgroundPath.close();
         canvas.clipPath(backgroundPath);
@@ -106,7 +136,7 @@ public class TimeScrollerIndicatorView extends View {
         }
 
         if (isInit) {
-            if (startPoint.equals(new PointF()) && endPoint.equals(new PointF())) {
+            if (startPoint.equals(newPoint) && endPoint.equals(newPoint)) {
                 startPoint.set(paddingLeft + additionWidth, paddingTop);
                 endPoint.set(paddingLeft + additionWidth, paddingTop + height);
                 isInit = false;
@@ -130,6 +160,7 @@ public class TimeScrollerIndicatorView extends View {
                     }
                 } else {
                     isInit = false;
+                    handler.removeCallbacks(initTask);
                 }
             }
         }
@@ -146,6 +177,7 @@ public class TimeScrollerIndicatorView extends View {
         canvas.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, indicatorPaint);
 
         if (isInit) {
+            //避免冲突
             if (isMoving) {
                 isInit = false;
             } else {
@@ -157,23 +189,33 @@ public class TimeScrollerIndicatorView extends View {
     public void setTime(int hour, int min) {
         this.hour = hour;
         this.min = min;
+        tmpHour = hour;
+        tmpMin = min;
         invalidate();
+    }
+
+    public void setOnClock(boolean onClock) {
+        isOnClock = onClock;
+        handler.removeCallbacks(onClockTask);
+        if (isOnClock) {
+            tmpHour = hour;
+            tmpMin = min;
+            handler.postDelayed(onClockTask, runClockTime);
+        } else {
+            handler.removeCallbacks(onClockTask);
+            hour = tmpHour;
+            min = tmpMin;
+
+            if (!isMoving) {
+                isInit = true;
+                invalidate();
+            }
+        }
     }
 
     public void setCanvasBorder(float canvasBorder) {
         this.canvasBorder = canvasBorder;
     }
-
-    /**
-     * 获取统一化像素大小
-     *
-     * @param dp 传入的值
-     * @return 转化成统一标准的值
-     */
-    public float getDp(int dp) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
-    }
-
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -181,9 +223,9 @@ public class TimeScrollerIndicatorView extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if (event.getX(0) >= startPoint.x - indicatorStrokeWidth && event.getX(0) <= startPoint.x + indicatorStrokeWidth
+                if (event.getX(0) >= startPoint.x - 3 * indicatorStrokeWidth / 2f && event.getX(0) <= startPoint.x + 3 * indicatorStrokeWidth / 2f
                         && event.getY(0) >= startPoint.y && event.getY(0) <= endPoint.y) {
-                    initHandler.removeCallbacks(initTask);
+                    handler.removeCallbacks(initTask);
                     isMoving = true;
                 }
                 break;
@@ -200,10 +242,22 @@ public class TimeScrollerIndicatorView extends View {
 
             case MotionEvent.ACTION_UP:
                 isMoving = false;
-                initHandler.postDelayed(initTask, 3000);
+                handler.postDelayed(initTask, indicatorRestoreTime);
                 break;
 
         }
         return true;
     }
+
+    /**
+     * 获取统一化像素大小
+     *
+     * @param dp 传入的值
+     * @return 转化成统一标准的值
+     */
+    public float getDp(int dp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
+    }
+
+
 }

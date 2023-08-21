@@ -1,11 +1,11 @@
 package com.ma.timescrollerview;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,6 +20,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         TimeScrollerView timeScrollerView = findViewById(R.id.timeScroller);
+        TimeScrollerIndicatorView timeScrollerIndicatorView = findViewById(R.id.indicator);
+        timeScrollerIndicatorView.setCanvasBorder(timeScrollerView.getCornerRadius());
+        timeScrollerIndicatorView.setOnClock(true);
+
         Button timeSectionButton = findViewById(R.id.timeSectionButton);
         timeSectionButton.setOnClickListener(new View.OnClickListener() {
             @Override
