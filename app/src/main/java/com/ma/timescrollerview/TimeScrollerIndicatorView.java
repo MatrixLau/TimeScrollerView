@@ -19,8 +19,8 @@ public class TimeScrollerIndicatorView extends View {
 
     private String TAG = getClass().getSimpleName();
 
-    private Path backgroundPath = new Path();
-    private Paint indicatorPaint;
+    private Path backgroundPath, trianglePath;
+    private Paint indicatorPaint, trianglePaint;
 
     private int indicatorColor = Color.BLUE;
     private float indicatorStrokeWidth = getDp(10);
@@ -70,13 +70,23 @@ public class TimeScrollerIndicatorView extends View {
     private float canvasBorder = getDp(0);
     private int tmpHour = -1;
     private int tmpMin = -1;
-    private long runClockTime = 100;
+    private long runClockTime = 6000;
 
     public void init() {
+
+        backgroundPath = new Path();
+        trianglePath = new Path();
+
         indicatorPaint = new Paint();
         indicatorPaint.setColor(indicatorColor);
         indicatorPaint.setStrokeWidth(indicatorStrokeWidth);
         indicatorPaint.setAntiAlias(true);
+
+        trianglePaint = new Paint();
+        trianglePaint.setColor(Color.RED);
+        trianglePaint.setAntiAlias(true);
+        trianglePaint.setStrokeWidth(indicatorStrokeWidth);
+        trianglePaint.setStyle(Paint.Style.FILL);
 
         if (isOnClock) {
             handler.postDelayed(onClockTask, runClockTime);
@@ -174,6 +184,20 @@ public class TimeScrollerIndicatorView extends View {
             endPoint.x = getWidth() - paddingRight;
         }
 
+        trianglePath.reset();
+        if (isMoving) {
+            trianglePath.moveTo(startPoint.x - indicatorStrokeWidth - 10f, (startPoint.y + endPoint.y) / 2f);
+            trianglePath.lineTo(startPoint.x - indicatorStrokeWidth - 10f + 10f, (startPoint.y + endPoint.y) / 2f + 10f);
+            trianglePath.lineTo(startPoint.x - indicatorStrokeWidth - 10f + 10f, (startPoint.y + endPoint.y) / 2f - 10f);
+            trianglePath.close();
+
+            trianglePath.moveTo(startPoint.x + indicatorStrokeWidth + 10f, (startPoint.y + endPoint.y) / 2f);
+            trianglePath.lineTo(startPoint.x + indicatorStrokeWidth + 10f - 10f, (startPoint.y + endPoint.y) / 2f + 10f);
+            trianglePath.lineTo(startPoint.x + indicatorStrokeWidth + 10f - 10f, (startPoint.y + endPoint.y) / 2f - 10f);
+            trianglePath.close();
+            canvas.drawPath(trianglePath, trianglePaint);
+        }
+
         canvas.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, indicatorPaint);
 
         if (isInit) {
@@ -206,6 +230,7 @@ public class TimeScrollerIndicatorView extends View {
             hour = tmpHour;
             min = tmpMin;
 
+            //TODO 确保即使onClock也要停留指定时间
             if (!isMoving) {
                 isInit = true;
                 invalidate();
