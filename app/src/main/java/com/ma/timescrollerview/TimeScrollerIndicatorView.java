@@ -33,6 +33,7 @@ public class TimeScrollerIndicatorView extends View {
 
     private boolean isMoving = false;
     private boolean isInit = true;
+    private boolean isRestoring = false;
 
     private float rollBackSpeed = 12f;
     private Handler handler = new Handler();
@@ -40,6 +41,7 @@ public class TimeScrollerIndicatorView extends View {
         @Override
         public void run() {
             if (!isMoving) {
+                isRestoring = true;
                 isInit = true;
                 invalidate();
             }
@@ -47,6 +49,7 @@ public class TimeScrollerIndicatorView extends View {
     };
     private long indicatorRestoreTime = 3000;
     private boolean isOnClock = false;
+    private long runClockTime = 60;
     private Runnable onClockTask = new Runnable() {
         @Override
         public void run() {
@@ -56,7 +59,7 @@ public class TimeScrollerIndicatorView extends View {
                 hour++;
             }
             hour = hour >= 24 ? 0 : hour;
-            if (!isMoving) {
+            if (!isMoving && !isRestoring) {
                 isInit = true;
                 invalidate();
 
@@ -70,55 +73,6 @@ public class TimeScrollerIndicatorView extends View {
     private float canvasBorder = getDp(0);
     private int tmpHour = -1;
     private int tmpMin = -1;
-    private long runClockTime = 6000;
-
-    public void init() {
-
-        backgroundPath = new Path();
-        trianglePath = new Path();
-
-        indicatorPaint = new Paint();
-        indicatorPaint.setColor(indicatorColor);
-        indicatorPaint.setStrokeWidth(indicatorStrokeWidth);
-        indicatorPaint.setAntiAlias(true);
-
-        trianglePaint = new Paint();
-        trianglePaint.setColor(Color.RED);
-        trianglePaint.setAntiAlias(true);
-        trianglePaint.setStrokeWidth(indicatorStrokeWidth);
-        trianglePaint.setStyle(Paint.Style.FILL);
-
-        if (isOnClock) {
-            handler.postDelayed(onClockTask, runClockTime);
-        }
-    }
-
-    public TimeScrollerIndicatorView(Context context) {
-        super(context);
-        init();
-    }
-
-    public TimeScrollerIndicatorView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-
-        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.TimeScrollerIndicatorView);
-
-        indicatorStrokeWidth = typedArray.getDimension(R.styleable.TimeScrollerIndicatorView_TimeScrollerIndicatorView_stroke_width, indicatorStrokeWidth);
-        indicatorColor = typedArray.getColor(R.styleable.TimeScrollerIndicatorView_TimeScrollerIndicatorView_indicator_color, indicatorColor);
-
-        typedArray.recycle();
-        init();
-    }
-
-    public TimeScrollerIndicatorView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init();
-    }
-
-    public TimeScrollerIndicatorView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        init();
-    }
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -170,6 +124,7 @@ public class TimeScrollerIndicatorView extends View {
                     }
                 } else {
                     isInit = false;
+                    isRestoring = false;
                     handler.removeCallbacks(initTask);
                 }
             }
@@ -210,36 +165,52 @@ public class TimeScrollerIndicatorView extends View {
         }
     }
 
-    public void setTime(int hour, int min) {
-        this.hour = hour;
-        this.min = min;
-        tmpHour = hour;
-        tmpMin = min;
-        invalidate();
-    }
+    public void init() {
 
-    public void setOnClock(boolean onClock) {
-        isOnClock = onClock;
-        handler.removeCallbacks(onClockTask);
+        backgroundPath = new Path();
+        trianglePath = new Path();
+
+        indicatorPaint = new Paint();
+        indicatorPaint.setColor(indicatorColor);
+        indicatorPaint.setStrokeWidth(indicatorStrokeWidth);
+        indicatorPaint.setAntiAlias(true);
+
+        trianglePaint = new Paint();
+        trianglePaint.setColor(Color.RED);
+        trianglePaint.setAntiAlias(true);
+        trianglePaint.setStrokeWidth(indicatorStrokeWidth);
+        trianglePaint.setStyle(Paint.Style.FILL);
+
         if (isOnClock) {
-            tmpHour = hour;
-            tmpMin = min;
             handler.postDelayed(onClockTask, runClockTime);
-        } else {
-            handler.removeCallbacks(onClockTask);
-            hour = tmpHour;
-            min = tmpMin;
-
-            //TODO 确保即使onClock也要停留指定时间
-            if (!isMoving) {
-                isInit = true;
-                invalidate();
-            }
         }
     }
 
-    public void setCanvasBorder(float canvasBorder) {
-        this.canvasBorder = canvasBorder;
+    public TimeScrollerIndicatorView(Context context) {
+        super(context);
+        init();
+    }
+
+    public TimeScrollerIndicatorView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.TimeScrollerIndicatorView);
+
+        indicatorStrokeWidth = typedArray.getDimension(R.styleable.TimeScrollerIndicatorView_TimeScrollerIndicatorView_stroke_width, indicatorStrokeWidth);
+        indicatorColor = typedArray.getColor(R.styleable.TimeScrollerIndicatorView_TimeScrollerIndicatorView_indicator_color, indicatorColor);
+
+        typedArray.recycle();
+        init();
+    }
+
+    public TimeScrollerIndicatorView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init();
+    }
+
+    public TimeScrollerIndicatorView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        init();
     }
 
     @Override
@@ -267,12 +238,45 @@ public class TimeScrollerIndicatorView extends View {
 
             case MotionEvent.ACTION_UP:
                 isMoving = false;
+                isRestoring = true;
                 handler.postDelayed(initTask, indicatorRestoreTime);
                 break;
 
         }
         return true;
     }
+
+    public void setTime(int hour, int min) {
+        this.hour = hour;
+        this.min = min;
+        tmpHour = hour;
+        tmpMin = min;
+        invalidate();
+    }
+
+    public void setOnClock(boolean onClock) {
+        isOnClock = onClock;
+        handler.removeCallbacks(onClockTask);
+        if (isOnClock) {
+            tmpHour = hour;
+            tmpMin = min;
+            handler.postDelayed(onClockTask, runClockTime);
+        } else {
+            handler.removeCallbacks(onClockTask);
+            hour = tmpHour;
+            min = tmpMin;
+
+            if (!isMoving) {
+                isInit = true;
+                invalidate();
+            }
+        }
+    }
+
+    public void setCanvasBorder(float canvasBorder) {
+        this.canvasBorder = canvasBorder;
+    }
+
 
     /**
      * 获取统一化像素大小
