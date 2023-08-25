@@ -223,6 +223,7 @@ public class TimeScrollerIndicatorView extends View {
                         && event.getY(0) >= startPoint.y && event.getY(0) <= endPoint.y) {
                     handler.removeCallbacks(initTask);
                     isMoving = true;
+                    return true;
                 }
                 break;
 
@@ -232,6 +233,7 @@ public class TimeScrollerIndicatorView extends View {
                         startPoint.x = event.getX(0);
                         endPoint.x = event.getX(0);
                         invalidate();
+                        return true;
                     }
                 }
                 break;
@@ -240,10 +242,9 @@ public class TimeScrollerIndicatorView extends View {
                 isMoving = false;
                 isRestoring = true;
                 handler.postDelayed(initTask, indicatorRestoreTime);
-                break;
-
+                return true;
         }
-        return true;
+        return false;
     }
 
     public void setTime(int hour, int min) {
