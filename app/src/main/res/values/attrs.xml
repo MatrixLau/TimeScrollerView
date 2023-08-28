@@ -18,4 +18,20 @@
         <attr name="TimeScrollerIndicatorView_indicator_color" format="color" />
     </declare-styleable>
 
+    <!--    <declare-styleable name="TimeScroller">-->
+
+    <!--        <attr name="TimeScrollerView_circle_color" format="color" />-->
+    <!--        <attr name="TimeScrollerView_rect_color" format="color" />-->
+    <!--        <attr name="TimeScrollerView_corner_radius" format="dimension" />-->
+    <!--        <attr name="TimeScrollerView_scroller_rail_width" format="dimension" />-->
+    <!--        <attr name="TimeScrollerView_scroller_color" format="color" />-->
+    <!--        <attr name="TimeScrollerView_scroller_rail_color" format="color" />-->
+    <!--        <attr name="TimeScrollerView_line_color" format="color" />-->
+    <!--        <attr name="TimeScrollerView_line_stroke" format="dimension" />-->
+    <!--        <attr name="TimeScrollerView_scroller_corner_radius" format="dimension" />-->
+
+    <!--        <attr name="TimeScrollerIndicatorView_stroke_width" format="dimension" />-->
+    <!--        <attr name="TimeScrollerIndicatorView_indicator_color" format="color" />-->
+    <!--    </declare-styleable>-->
+
 </resources>

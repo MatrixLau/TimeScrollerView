@@ -2,8 +2,6 @@ package com.ma.timescrollerview;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,26 +22,43 @@ public class MainActivity extends AppCompatActivity {
         timeScrollerIndicatorView.setCanvasBorder(timeScrollerView.getCornerRadius());
         timeScrollerIndicatorView.setOnClock(true);
 
-        Button timeSectionButton = findViewById(R.id.timeSectionButton);
-        timeSectionButton.setOnClickListener(new View.OnClickListener() {
+        timeScrollerIndicatorView.setOnIndicatorDragListener(new TimeScrollerIndicatorView.onIndicatorDragListener() {
             @Override
-            public void onClick(View v) {
-                if (timeSectionCount == 24) timeSectionCount = 0;
-                else timeSectionCount++;
-                timeScrollerView.setTimeSectionCount(timeSectionCount);
-                Log.i(TAG, "onClick: TimeSectionCount=" + timeSectionCount + " TimeSectionStartPosition=" + timeSectionStartPositionCount);
+            public void onDragStarted(float x, float y) {
+
+            }
+
+            @Override
+            public void onDragging(float x, float y) {
+//                Log.e(TAG, "onDragging: x="+x+" y="+y);
+            }
+
+            @Override
+            public void onDragFinished(float x, float y) {
+                Log.e(TAG, "onDragFinished: x=" + x + " y=" + y);
             }
         });
 
-        Button timeSectionStartPositionButton = findViewById(R.id.timeSectionStartPositionButton);
-        timeSectionStartPositionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (timeSectionStartPositionCount == 24) timeSectionStartPositionCount = 1;
-                else timeSectionStartPositionCount++;
-                timeScrollerView.setTimeSectionStartPosition(timeSectionStartPositionCount);
-                Log.i(TAG, "onClick: TimeSectionCount=" + timeSectionCount + " TimeSectionStartPosition=" + timeSectionStartPositionCount);
-            }
-        });
+//        Button timeSectionButton = findViewById(R.id.timeSectionButton);
+//        timeSectionButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (timeSectionCount == 24) timeSectionCount = 0;
+//                else timeSectionCount++;
+//                timeScrollerView.setTimeSectionCount(timeSectionCount);
+//                Log.i(TAG, "onClick: TimeSectionCount=" + timeSectionCount + " TimeSectionStartPosition=" + timeSectionStartPositionCount);
+//            }
+//        });
+//
+//        Button timeSectionStartPositionButton = findViewById(R.id.timeSectionStartPositionButton);
+//        timeSectionStartPositionButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (timeSectionStartPositionCount == 24) timeSectionStartPositionCount = 1;
+//                else timeSectionStartPositionCount++;
+//                timeScrollerView.setTimeSectionStartPosition(timeSectionStartPositionCount);
+//                Log.i(TAG, "onClick: TimeSectionCount=" + timeSectionCount + " TimeSectionStartPosition=" + timeSectionStartPositionCount);
+//            }
+//        });
     }
 }

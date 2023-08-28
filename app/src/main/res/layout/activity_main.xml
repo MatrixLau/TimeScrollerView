@@ -20,14 +20,14 @@
             android:layout_alignParentTop="true"
             app:TimeScrollerView_corner_radius="20dp"
             app:TimeScrollerView_rect_color="#242847"
-            app:TimeScrollerView_scroller_corner_radius="1dp" />
+            app:TimeScrollerView_scroller_corner_radius="0dp" />
 
         <com.ma.timescrollerview.TimeScrollerIndicatorView
             android:id="@+id/indicator"
             android:layout_width="match_parent"
             android:layout_height="80dp"
             app:TimeScrollerIndicatorView_indicator_color="@color/teal_200"
-            app:TimeScrollerIndicatorView_stroke_width="8dp" />
+            app:TimeScrollerIndicatorView_stroke_width="4dp" />
 
         <com.ma.timescrollerview.TimeScroller
             android:layout_width="match_parent"
@@ -38,26 +38,26 @@
             app:TimeScrollerView_corner_radius="20dp"
             app:TimeScrollerView_rect_color="#242847"
             app:TimeScrollerIndicatorView_stroke_width="8dp"
-            app:TimeScrollerView_scroller_corner_radius="1dp" />
+            app:TimeScrollerView_scroller_corner_radius="0dp" />
     </RelativeLayout>
 
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/timeSectionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/scroller"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="105dp"
-        android:text="Click to INCREASE" />
+    <!--    <androidx.appcompat.widget.AppCompatButton-->
+    <!--        android:id="@+id/timeSectionButton"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_below="@+id/scroller"-->
+    <!--        android:layout_centerHorizontal="true"-->
+    <!--        android:layout_marginTop="105dp"-->
+    <!--        android:text="Click to INCREASE" />-->
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/timeSectionStartPositionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/timeSectionButton"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="36dp"
-        android:text="Click to MOVE" />
+    <!--    <androidx.appcompat.widget.AppCompatButton-->
+    <!--        android:id="@+id/timeSectionStartPositionButton"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_below="@+id/timeSectionButton"-->
+    <!--        android:layout_centerInParent="true"-->
+    <!--        android:layout_marginTop="36dp"-->
+    <!--        android:text="Click to MOVE" />-->
 
 </RelativeLayout>

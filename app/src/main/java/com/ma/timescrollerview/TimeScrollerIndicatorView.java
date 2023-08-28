@@ -74,6 +74,8 @@ public class TimeScrollerIndicatorView extends View {
     private int tmpHour = -1;
     private int tmpMin = -1;
 
+    private onIndicatorDragListener onIndicatorDragListener = null;
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -223,6 +225,8 @@ public class TimeScrollerIndicatorView extends View {
                         && event.getY(0) >= startPoint.y && event.getY(0) <= endPoint.y) {
                     handler.removeCallbacks(initTask);
                     isMoving = true;
+                    if (onIndicatorDragListener != null)
+                        onIndicatorDragListener.onDragStarted(event.getX(), event.getY());
                     return true;
                 }
                 break;
@@ -232,6 +236,8 @@ public class TimeScrollerIndicatorView extends View {
                     if (startPoint.x != event.getX(0)) {
                         startPoint.x = event.getX(0);
                         endPoint.x = event.getX(0);
+                        if (onIndicatorDragListener != null)
+                            onIndicatorDragListener.onDragging(event.getX(), event.getY());
                         invalidate();
                         return true;
                     }
@@ -240,7 +246,10 @@ public class TimeScrollerIndicatorView extends View {
 
             case MotionEvent.ACTION_UP:
                 isMoving = false;
+                invalidate();
                 isRestoring = true;
+                if (onIndicatorDragListener != null)
+                    onIndicatorDragListener.onDragFinished(event.getX(), event.getY());
                 handler.postDelayed(initTask, indicatorRestoreTime);
                 return true;
         }
@@ -278,6 +287,9 @@ public class TimeScrollerIndicatorView extends View {
         this.canvasBorder = canvasBorder;
     }
 
+    public void setOnIndicatorDragListener(TimeScrollerIndicatorView.onIndicatorDragListener onIndicatorDragListener) {
+        this.onIndicatorDragListener = onIndicatorDragListener;
+    }
 
     /**
      * 获取统一化像素大小
@@ -287,6 +299,14 @@ public class TimeScrollerIndicatorView extends View {
      */
     public float getDp(int dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
+    }
+
+    public interface onIndicatorDragListener {
+        void onDragStarted(float x, float y);
+
+        void onDragging(float x, float y);
+
+        void onDragFinished(float x, float y);
     }
 
 

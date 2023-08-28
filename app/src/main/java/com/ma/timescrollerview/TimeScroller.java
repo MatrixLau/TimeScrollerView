@@ -3,14 +3,12 @@ package com.ma.timescrollerview;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.RelativeLayout;
 
 public class TimeScroller extends RelativeLayout {
 
-    String TAG = getClass().getSimpleName();
+    private String TAG = getClass().getSimpleName();
 
     public TimeScroller(Context context) {
         super(context);
@@ -36,19 +34,32 @@ public class TimeScroller extends RelativeLayout {
         TimeScrollerView timeScrollerView = new TimeScrollerView(getContext(), attrs);
         TimeScrollerIndicatorView timeScrollerIndicatorView = new TimeScrollerIndicatorView(getContext(), attrs);
 
-        timeScrollerIndicatorView.setOnDragListener(new OnDragListener() {
+        addView(timeScrollerView);
+        timeScrollerIndicatorView.setCanvasBorder(timeScrollerView.getCornerRadius());
+        timeScrollerIndicatorView.setOnIndicatorDragListener(new TimeScrollerIndicatorView.onIndicatorDragListener() {
             @Override
-            public boolean onDrag(View v, DragEvent event) {
-                Log.e(TAG, "onDrag: " + event.toString());
-                return false;
+            public void onDragStarted(float x, float y) {
+
+            }
+
+            @Override
+            public void onDragging(float x, float y) {
+//                Log.e(TAG, "onDragging: x="+x+" y="+y);
+            }
+
+            @Override
+            public void onDragFinished(float x, float y) {
+                Log.e(TAG, "onDragFinished: x=" + x + " y=" + y);
+                Log.e(TAG, "onDragFinished: index:" + timeScrollerView.getStartTimeSectionFromCoordinate(x));
             }
         });
-        addView(timeScrollerView);
+//        timeScrollerIndicatorView.setOnClock(true);
         addView(timeScrollerIndicatorView);
     }
 
     public void init() {
-        TimeScrollerView timeScrollerView = new TimeScrollerView(getContext(), null);
+        TimeScrollerView timeScrollerView = new TimeScrollerView(getContext());
+        TimeScrollerIndicatorView timeScrollerIndicatorView = new TimeScrollerIndicatorView(getContext());
     }
 
     @Override

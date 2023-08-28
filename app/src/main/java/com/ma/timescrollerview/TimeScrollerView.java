@@ -8,15 +8,16 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+
+import java.util.ArrayList;
 
 public class TimeScrollerView extends View {
 
     // 设置画笔变量
-    Paint circlePaint, cornerRadiusPaint, rectPaint, scrollerPaint, scrollerRailPaint, scaleTextPaint, linePaint;
-    Path backgroundPath;
+    private Paint circlePaint, cornerRadiusPaint, rectPaint, scrollerPaint, scrollerRailPaint, scaleTextPaint, linePaint;
+    private Path backgroundPath;
     private String TAG = getClass().getSimpleName();
     private int circleColor = Color.RED;
     private int rectColor = Color.GRAY;
@@ -28,9 +29,25 @@ public class TimeScrollerView extends View {
     private float lineStroke = getDp(2);
     private float lineGap;
 
-    private int timeSectionCount = 0;
-    private int timeSectionStartPosition = 0;
+    //    private int timeSectionCount = 0;
+//    private int timeSectionStartPosition = 0;
     private float scrollerCornerRadius = getDp(0);
+
+    private TimeScrollerData timeScrollerData = new TimeScrollerData();
+
+    private int[] colorArr = {
+            0xff1B2782, 0xff114773, 0xff1D6B33, 0xff8FA135,
+            0xff9E5437, 0xff8A5115, 0xff801787,
+    };
+//    private int[] colorArr = {
+//            0xffDFFF00, 0xffFFBF00, 0xffFF7F50, 0xffDE3163,
+//            0xff9FE2BF, 0xff40E0D0, 0xff6495ED, 0xffCCCCFF,
+//    };
+
+    private float timeSectionX = 0f;
+    private float timeSectionY = 0f;
+    private int timeSectionIndex = -1;
+    private ArrayList<Float> timeSectionXData = new ArrayList<>();
 
     // 自定义View有四个构造函数
     // 如果View是在Java代码里面new的，则调用第一个构造函数
@@ -146,7 +163,6 @@ public class TimeScrollerView extends View {
     // 复写onDraw()进行绘制
     @Override
     protected void onDraw(Canvas canvas) {
-
         super.onDraw(canvas);
 
         // 获取传入的padding值
@@ -158,6 +174,8 @@ public class TimeScrollerView extends View {
         // 获取绘制内容的高度和宽度（考虑了四个方向的padding值）
         int width = getWidth() - paddingLeft - paddingRight;
         int height = getHeight() - paddingTop - paddingBottom;
+
+        timeSectionXData.clear();
 
         //图像设置圆角 锯齿严重
 //        setOutlineProvider(new ViewOutlineProvider() {
@@ -212,48 +230,84 @@ public class TimeScrollerView extends View {
         //画滑道
         canvas.drawRect(paddingLeft, getHeight() / 2f - rollerRail / 2, getWidth() - paddingRight, getHeight() / 2f + rollerRail / 2, scrollerRailPaint);
 
-        //计算开始位置
+        if (timeScrollerData.getData().size() > 1) {
+            //计算开始位置
 //        int timeSectionStartPosition = 24;
-        float timeSectionStartWidth = 0f;
-        timeSectionStartWidth = timeSectionStartPosition * lineGap;
+//            float timeSectionStartWidth = 0f;
+//            timeSectionStartWidth = Float.parseFloat(scrollerData.get(0).getHour()) * lineGap + Float.parseFloat(scrollerData.get(0).getMin()) * lineGap / 60f;
 
-        //计算滑轮长度
-//        int timeSectionCount = 6;
-        float timeSectionWidth = 0f;
+            //计算滑轮长度
+//            int timeSectionCount = 6;
+//            float timeSectionWidth = 0f;
 
-        if (timeSectionCount == 0) {
-            timeSectionWidth = 0f;
-        } else if (timeSectionCount == 24) {
-            timeSectionWidth = width;
-        } else if (timeSectionStartPosition + timeSectionCount <= 24) {
-            timeSectionWidth = timeSectionCount * lineGap;
-        } else if (timeSectionStartPosition + timeSectionCount > 24) {
-            int todaySection = 24 - timeSectionStartPosition;
-            float todaySectionWidth = todaySection * lineGap;
-            int sectionsLeft = timeSectionStartPosition + timeSectionCount - 24;
-            float sectionsLeftWidth = sectionsLeft * lineGap;
-            timeSectionWidth = todaySectionWidth + sectionsLeftWidth;
-        }
+            //TODO 修改 固定小时刻度 为使用 分钟刻度 计算
 
-        //画滑轮
-        if (timeSectionStartPosition + timeSectionCount <= 24) {
-            Log.i(TAG, "onDraw: timeSectionStartWidth=" + timeSectionStartWidth + " timeSectionWidth=" + timeSectionWidth);
-            //当天
-            canvas.drawRoundRect(paddingLeft + timeSectionStartWidth, getHeight() / 2f - rollerRail / 2, paddingLeft + timeSectionStartWidth + timeSectionWidth, getHeight() / 2f + rollerRail / 2, scrollerCornerRadius, scrollerCornerRadius, scrollerPaint);
-        } else {
-            //跨天
-            float diff = timeSectionWidth - (width - timeSectionStartWidth);
-            if (timeSectionStartPosition != 24) {
-                //先画当天
-                canvas.drawRoundRect(paddingLeft + timeSectionStartWidth, getHeight() / 2f - rollerRail / 2, paddingLeft + width, getHeight() / 2f + rollerRail / 2, scrollerCornerRadius, scrollerCornerRadius, scrollerPaint);
+//            if (timeSectionCount == 0) {
+//                timeSectionWidth = 0f;
+//            } else if (timeSectionCount == 24) {
+//                timeSectionWidth = width;
+//            } else if (timeSectionStartPosition + timeSectionCount <= 24) {
+//                timeSectionWidth = timeSectionCount * lineGap;
+//            } else if (timeSectionStartPosition + timeSectionCount > 24) {
+//                int todaySection = 24 - timeSectionStartPosition;
+//                float todaySectionWidth = todaySection * lineGap;
+//                int sectionsLeft = timeSectionStartPosition + timeSectionCount - 24;
+//                float sectionsLeftWidth = sectionsLeft * lineGap;
+//                timeSectionWidth = todaySectionWidth + sectionsLeftWidth;
+//            }
+
+            //画滑轮
+//            if (timeSectionStartPosition + timeSectionCount <= 24) {
+////            Log.i(TAG, "onDraw: timeSectionStartWidth=" + timeSectionStartWidth + " timeSectionWidth=" + timeSectionWidth);
+//                //当天
+//                canvas.drawRoundRect(paddingLeft + timeSectionStartWidth, getHeight() / 2f - rollerRail / 2, paddingLeft + timeSectionStartWidth + timeSectionWidth, getHeight() / 2f + rollerRail / 2, scrollerCornerRadius, scrollerCornerRadius, scrollerPaint);
+//            } else {
+//                //跨天
+//                float diff = timeSectionWidth - (width - timeSectionStartWidth);
+//                if (timeSectionStartPosition != 24) {
+//                    //先画当天
+//                    canvas.drawRoundRect(paddingLeft + timeSectionStartWidth, getHeight() / 2f - rollerRail / 2, paddingLeft + width, getHeight() / 2f + rollerRail / 2, scrollerCornerRadius, scrollerCornerRadius, scrollerPaint);
+//                }
+//                //再画隔天
+//                canvas.drawRoundRect(paddingLeft, getHeight() / 2f - rollerRail / 2, paddingLeft + diff, getHeight() / 2f + rollerRail / 2, scrollerCornerRadius, scrollerCornerRadius, scrollerPaint);
+//            }
+            for (int i = 0; i < timeScrollerData.getData().size() - 1; i++) {
+                int sectionHour = Integer.parseInt(timeScrollerData.getData().get(i).getHour());
+                int sectionMin = Integer.parseInt(timeScrollerData.getData().get(i).getMin());
+                int nextSectionHour = Integer.parseInt(timeScrollerData.getData().get(i + 1).getHour());
+                int nextSectionMin = Integer.parseInt(timeScrollerData.getData().get(i + 1).getMin());
+                float timeSectionStartWidth = sectionHour * lineGap + sectionMin * lineGap / 60f;
+                float timeSectionEndWidth = nextSectionHour * lineGap + nextSectionMin * lineGap / 60f;
+
+                timeSectionXData.add(paddingLeft + timeSectionStartWidth);
+                if (i == timeScrollerData.getData().size() - 2)
+                    timeSectionXData.add(paddingLeft + timeSectionEndWidth);
+
+                int colorIndex = i;
+                while (colorIndex >= colorArr.length) colorIndex -= colorArr.length;
+                scrollerPaint.setColor(colorArr[colorIndex]);
+
+                float textWidth = scaleTextPaint.measureText(String.valueOf(i + 1)) / 2f;
+                float textHeight = scaleTextPaint.getFontSpacing() * 0.3f;
+                float textStartWidth = (timeSectionStartWidth + timeSectionEndWidth) / 2f - textWidth;
+
+                //当天
+                if (sectionHour <= nextSectionHour) {
+                    canvas.drawRoundRect(paddingLeft + timeSectionStartWidth, getHeight() / 2f - rollerRail / 2, paddingLeft + timeSectionEndWidth, getHeight() / 2f + rollerRail / 2, scrollerCornerRadius, scrollerCornerRadius, scrollerPaint);
+                    canvas.drawText(String.valueOf(i + 1), paddingLeft + textStartWidth, getHeight() / 2f - rollerRail / 2 - textHeight, scaleTextPaint);
+                } else {  //跨天
+                    canvas.drawRoundRect(paddingLeft + timeSectionStartWidth, getHeight() / 2f - rollerRail / 2, getWidth() - paddingRight, getHeight() / 2f + rollerRail / 2, scrollerCornerRadius, scrollerCornerRadius, scrollerPaint);
+                    canvas.drawText(String.valueOf(i + 1), paddingLeft + (timeSectionStartWidth + getWidth() - paddingRight) / 2f - textWidth, getHeight() / 2f - rollerRail / 2 - textHeight, scaleTextPaint);
+
+                    canvas.drawRoundRect(paddingLeft, getHeight() / 2f - rollerRail / 2, paddingLeft + timeSectionEndWidth, getHeight() / 2f + rollerRail / 2, scrollerCornerRadius, scrollerCornerRadius, scrollerPaint);
+                    canvas.drawText(String.valueOf(i + 1), paddingLeft + timeSectionEndWidth / 2f - textWidth, getHeight() / 2f - rollerRail / 2 - textHeight, scaleTextPaint);
+                }
+
             }
-            //在画隔天
-            canvas.drawRoundRect(paddingLeft, getHeight() / 2f - rollerRail / 2, paddingLeft + diff, getHeight() / 2f + rollerRail / 2, scrollerCornerRadius, scrollerCornerRadius, scrollerPaint);
         }
 
 
-//
-//        // 获取控件的高度和宽度
+        // 获取控件的高度和宽度
 //        int width = getWidth();
 //        int height = getHeight();
 //
@@ -268,22 +322,48 @@ public class TimeScrollerView extends View {
 
     }
 
-    public int getTimeSectionCount() {
-        return timeSectionCount;
+//    public int getTimeSectionCount() {
+//        return timeSectionCount;
+//    }
+//
+//    public void setTimeSectionCount(int timeSectionCount) {
+//        this.timeSectionCount = timeSectionCount;
+//        invalidate();
+//    }
+//
+//    public int getTimeSectionStartPosition() {
+//        return timeSectionStartPosition;
+//    }
+//
+//    public void setTimeSectionStartPosition(int timeSectionStartPosition) {
+//        this.timeSectionStartPosition = timeSectionStartPosition;
+//        invalidate();
+//    }
+
+    public float getCornerRadius() {
+        return cornerRadius;
     }
 
-    public void setTimeSectionCount(int timeSectionCount) {
-        this.timeSectionCount = timeSectionCount;
-        invalidate();
-    }
-
-    public int getTimeSectionStartPosition() {
-        return timeSectionStartPosition;
-    }
-
-    public void setTimeSectionStartPosition(int timeSectionStartPosition) {
-        this.timeSectionStartPosition = timeSectionStartPosition;
-        invalidate();
+    /**
+     * 获取点的X轴位置判断是否存在的时间段
+     *
+     * @param x 点的X
+     * @return 若存在则返回时间段序列号，否则返回-1
+     */
+    public int getStartTimeSectionFromCoordinate(float x) {
+        for (int i = 0; i < timeSectionXData.size() - 1; i++) {
+            if (timeSectionXData.get(i) <= timeSectionXData.get(i + 1)) {
+                if (x >= timeSectionXData.get(i) && x <= timeSectionXData.get(i + 1)) {
+                    return i + 1;
+                }
+            } else {
+                if ((x >= timeSectionXData.get(i) && x <= getWidth() - getPaddingRight())
+                        || (x >= getPaddingLeft() && x <= timeSectionXData.get(i + 1))) {
+                    return i + 1;
+                }
+            }
+        }
+        return -1;
     }
 
     /**
@@ -294,5 +374,71 @@ public class TimeScrollerView extends View {
      */
     public float getDp(int dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
+    }
+}
+
+class TimeScrollerData {
+    private ArrayList<TimeScrollerSection> data = new ArrayList<TimeScrollerSection>() {
+        {
+            add(new TimeScrollerSection("9", "10"));
+            add(new TimeScrollerSection("10", "30"));
+            add(new TimeScrollerSection("12", "50"));
+            add(new TimeScrollerSection("14", "20"));
+            add(new TimeScrollerSection("17", "30"));
+            add(new TimeScrollerSection("18", "00"));
+            add(new TimeScrollerSection("19", "00"));
+            add(new TimeScrollerSection("20", "00"));
+            add(new TimeScrollerSection("21", "00"));
+            add(new TimeScrollerSection("22", "00"));
+            add(new TimeScrollerSection("22", "30"));
+            add(new TimeScrollerSection("1", "00"));
+            add(new TimeScrollerSection("1", "30"));
+            add(new TimeScrollerSection("2", "00"));
+            add(new TimeScrollerSection("4", "30"));
+        }
+    };
+
+    public ArrayList<TimeScrollerSection> getData() {
+        return data;
+    }
+
+    public void setData(ArrayList<TimeScrollerSection> data) {
+        this.data.clear();
+        this.data.addAll(data);
+    }
+}
+
+class TimeScrollerSection {
+
+    private String hour;
+    private String min;
+
+    TimeScrollerSection(String hour, String min) {
+        this.hour = hour;
+        this.min = min;
+    }
+
+    public String getHour() {
+        return hour;
+    }
+
+    public void setHour(String hour) {
+        this.hour = hour;
+    }
+
+    public String getMin() {
+        return min;
+    }
+
+    public void setMin(String min) {
+        this.min = min;
+    }
+
+    @Override
+    public String toString() {
+        return "TimeScrollerSection{" +
+                "hour='" + hour + '\'' +
+                ", min='" + min + '\'' +
+                '}';
     }
 }
