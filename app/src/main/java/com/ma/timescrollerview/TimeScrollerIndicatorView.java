@@ -25,8 +25,8 @@ public class TimeScrollerIndicatorView extends View {
     private int indicatorColor = Color.BLUE;
     private float indicatorStrokeWidth = getDp(10);
     private float widthPerMin = 0f;
-    private int hour = 2;
-    private int min = 19;
+    private int hour = 10;
+    private int min = 28;
     private PointF startPoint = new PointF();
     private PointF endPoint = new PointF();
     private PointF newPoint = new PointF();
@@ -49,7 +49,8 @@ public class TimeScrollerIndicatorView extends View {
     };
     private long indicatorRestoreTime = 3000;
     private boolean isOnClock = false;
-    private long runClockTime = 60;
+    private long runClockTime = 1000;
+    private onClockTickingListener onClockTickingListener = null;
     private Runnable onClockTask = new Runnable() {
         @Override
         public void run() {
@@ -61,8 +62,8 @@ public class TimeScrollerIndicatorView extends View {
             hour = hour >= 24 ? 0 : hour;
             if (!isMoving && !isRestoring) {
                 isInit = true;
+                isFromClockTask = true;
                 invalidate();
-
             }
             if (isOnClock) {
                 handler.postDelayed(onClockTask, runClockTime);
@@ -75,6 +76,7 @@ public class TimeScrollerIndicatorView extends View {
     private int tmpMin = -1;
 
     private onIndicatorDragListener onIndicatorDragListener = null;
+    private boolean isFromClockTask = false;
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -157,6 +159,11 @@ public class TimeScrollerIndicatorView extends View {
 
         canvas.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, indicatorPaint);
 
+        if (!isRestoring && isOnClock && isFromClockTask) {
+            if (onClockTickingListener != null) onClockTickingListener.onClockTicking(startPoint.x);
+            isFromClockTask = false;
+        }
+
         if (isInit) {
             //避免冲突
             if (isMoving) {
@@ -165,6 +172,10 @@ public class TimeScrollerIndicatorView extends View {
                 invalidate();
             }
         }
+    }
+
+    public void setOnClockTickingListener(TimeScrollerIndicatorView.onClockTickingListener onClockTickingListener) {
+        this.onClockTickingListener = onClockTickingListener;
     }
 
     public void init() {
@@ -289,6 +300,10 @@ public class TimeScrollerIndicatorView extends View {
 
     public void setOnIndicatorDragListener(TimeScrollerIndicatorView.onIndicatorDragListener onIndicatorDragListener) {
         this.onIndicatorDragListener = onIndicatorDragListener;
+    }
+
+    public interface onClockTickingListener {
+        void onClockTicking(float x);
     }
 
     /**

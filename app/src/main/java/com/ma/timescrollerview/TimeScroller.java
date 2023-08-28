@@ -53,7 +53,14 @@ public class TimeScroller extends RelativeLayout {
                 Log.e(TAG, "onDragFinished: index:" + timeScrollerView.getStartTimeSectionFromCoordinate(x));
             }
         });
-//        timeScrollerIndicatorView.setOnClock(true);
+        timeScrollerIndicatorView.setOnClockTickingListener(new TimeScrollerIndicatorView.onClockTickingListener() {
+            @Override
+            public void onClockTicking(float x) {
+                Log.w(TAG, "onClockTicking: x=" + x);
+                Log.w(TAG, "onClockTicking: currentSectionIndex=" + timeScrollerView.getStartTimeSectionFromCoordinate(x));
+            }
+        });
+        timeScrollerIndicatorView.setOnClock(true);
         addView(timeScrollerIndicatorView);
     }
 
