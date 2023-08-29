@@ -9,6 +9,7 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -37,24 +38,16 @@ public class TimeScrollerIndicatorView extends View {
 
     private float rollBackSpeed = 12f;
     private Handler handler = new Handler();
-    private Runnable initTask = new Runnable() {
-        @Override
-        public void run() {
-            if (!isMoving) {
-                isRestoring = true;
-                isInit = true;
-                invalidate();
-            }
-        }
-    };
+    private long runClockTime = 60;
     private long indicatorRestoreTime = 3000;
     private boolean isOnClock = false;
-    private long runClockTime = 1000;
+    private int restoreHour = 0;
     private onClockTickingListener onClockTickingListener = null;
+    private int restoreMin = 0;
     private Runnable onClockTask = new Runnable() {
         @Override
         public void run() {
-//            Log.e(TAG, "run: isOnClock:"+isOnClock);
+//            Log.e(TAG, "run: isOnClock:"+isOnClock+" isInit:"+isInit+" isMoving:"+isMoving+" isRestoring:"+isRestoring);
             if (++min >= 60) {
                 min = 0;
                 hour++;
@@ -74,9 +67,19 @@ public class TimeScrollerIndicatorView extends View {
     private float canvasBorder = getDp(0);
     private int tmpHour = -1;
     private int tmpMin = -1;
-
-    private onIndicatorDragListener onIndicatorDragListener = null;
-    private boolean isFromClockTask = false;
+    private Runnable initTask = new Runnable() {
+        @Override
+        public void run() {
+            if (!isMoving) {
+                isRestoring = true;
+                isInit = true;
+                restoreHour = hour;
+                restoreMin = min;
+                Log.e(TAG, "initTask: Restoring......");
+                invalidate();
+            }
+        }
+    };
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -98,9 +101,11 @@ public class TimeScrollerIndicatorView extends View {
         widthPerMin = (float) width / 1440;
 
         float additionWidth = 0f;
+        float additionWidthRestore = 0f;
 
         if (hour >= 0 && min >= 0) {
             additionWidth += ((hour * 60) + min) * widthPerMin;
+            additionWidthRestore += ((restoreHour * 60) + restoreMin) * widthPerMin;
         }
 
         if (isInit) {
@@ -110,27 +115,57 @@ public class TimeScrollerIndicatorView extends View {
                 isInit = false;
             } else {
                 float distance = 0f;
-                if (startPoint.x > paddingLeft + additionWidth) {
-                    distance = startPoint.x - paddingLeft + additionWidth;
+                float targetPosX = paddingLeft + additionWidth;
+                float restorePosX = paddingLeft + additionWidthRestore;
+                if (startPoint.x > targetPosX) {  //后退
+                    distance = startPoint.x - targetPosX;
+//                    Log.e(TAG, "onDraw: distance="+distance);
                     startPoint.x -= distance / rollBackSpeed;
                     endPoint.x -= distance / rollBackSpeed;
-                    if (startPoint.x < paddingLeft + additionWidth) {
-                        startPoint.x = paddingLeft + additionWidth;
-                        endPoint.x = paddingLeft + additionWidth;
+                    if (startPoint.x < targetPosX) {
+                        startPoint.x = targetPosX;
+                        endPoint.x = targetPosX;
+                    } else if (startPoint.x > targetPosX && startPoint.x <= restorePosX) {
+                        if (isRestoring) {
+                            Log.e(TAG, "initTask: Restored");
+                            handler.removeCallbacks(initTask);
+                            isRestoring = false;
+                        }
                     }
-                } else if (startPoint.x < paddingLeft + additionWidth) {
-                    distance = paddingLeft + additionWidth - startPoint.x;
+//                    Log.e(TAG, "onDraw: 1");
+//                    Log.e(TAG, "onDraw: startPoint.x="+startPoint.x+" paddingLeft+additionWidth="+String.valueOf(paddingLeft + additionWidth));
+                } else if (startPoint.x < targetPosX) {  //前移
+                    distance = targetPosX - startPoint.x;
+                    distance = Math.max(distance, widthPerMin);
+//                    Log.e(TAG, "onDraw: distance="+distance);
                     startPoint.x += distance / rollBackSpeed;
                     endPoint.x += distance / rollBackSpeed;
-                    if (startPoint.x > paddingLeft + additionWidth) {
-                        startPoint.x = paddingLeft + additionWidth;
-                        endPoint.x = paddingLeft + additionWidth;
+                    if (startPoint.x > targetPosX) {
+                        startPoint.x = targetPosX;
+                        endPoint.x = targetPosX;
+                    } else if (startPoint.x < targetPosX && startPoint.x >= restorePosX) {
+                        if (isRestoring) {
+                            Log.e(TAG, "initTask: Restored");
+                            handler.removeCallbacks(initTask);
+                            isRestoring = false;
+                        }
                     }
+//                    Log.e(TAG, "onDraw: startPoint.x="+startPoint.x+" paddingLeft+additionWidth="+String.valueOf(paddingLeft + additionWidth));
+//                    Log.e(TAG, "onDraw: 2");
                 } else {
+                    if (isRestoring) {
+                        Log.e(TAG, "initTask: Restored");
+                        handler.removeCallbacks(initTask);
+                        isRestoring = false;
+                    }
                     isInit = false;
-                    isRestoring = false;
-                    handler.removeCallbacks(initTask);
                 }
+            }
+
+            if (!isRestoring && isOnClock && isFromClockTask) {
+                if (onClockTickingListener != null)
+                    onClockTickingListener.onClockTicking(startPoint.x);
+                isFromClockTask = false;
             }
         }
 
@@ -159,19 +194,59 @@ public class TimeScrollerIndicatorView extends View {
 
         canvas.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, indicatorPaint);
 
-        if (!isRestoring && isOnClock && isFromClockTask) {
-            if (onClockTickingListener != null) onClockTickingListener.onClockTicking(startPoint.x);
-            isFromClockTask = false;
-        }
-
         if (isInit) {
             //避免冲突
             if (isMoving) {
                 isInit = false;
+                isRestoring = false;
             } else {
                 invalidate();
             }
         }
+    }
+
+    private onIndicatorDragListener onIndicatorDragListener = null;
+    private boolean isFromClockTask = false;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+//        Log.w(TAG, "onTouchEvent: " + event.toString());
+
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                if (event.getX(0) >= startPoint.x - 3 * indicatorStrokeWidth / 2f && event.getX(0) <= startPoint.x + 3 * indicatorStrokeWidth / 2f
+                        && event.getY(0) >= startPoint.y && event.getY(0) <= endPoint.y) {
+                    handler.removeCallbacks(initTask);
+                    isMoving = true;
+                    if (onIndicatorDragListener != null)
+                        onIndicatorDragListener.onDragStarted(event.getX(), event.getY());
+                    return true;
+                }
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                if (isMoving) {
+                    if (startPoint.x != event.getX(0)) {
+                        startPoint.x = event.getX(0);
+                        endPoint.x = event.getX(0);
+                        if (onIndicatorDragListener != null)
+                            onIndicatorDragListener.onDragging(event.getX(), event.getY());
+                        invalidate();
+                        return true;
+                    }
+                }
+                break;
+
+            case MotionEvent.ACTION_UP:
+                isMoving = false;
+                isRestoring = true;
+                handler.postDelayed(initTask, indicatorRestoreTime);
+                invalidate();
+                if (onIndicatorDragListener != null)
+                    onIndicatorDragListener.onDragFinished(event.getX(), event.getY());
+                return true;
+        }
+        return false;
     }
 
     public void setOnClockTickingListener(TimeScrollerIndicatorView.onClockTickingListener onClockTickingListener) {
@@ -226,47 +301,12 @@ public class TimeScrollerIndicatorView extends View {
         init();
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-//        Log.w(TAG, "onTouchEvent: " + event.toString());
-
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                if (event.getX(0) >= startPoint.x - 3 * indicatorStrokeWidth / 2f && event.getX(0) <= startPoint.x + 3 * indicatorStrokeWidth / 2f
-                        && event.getY(0) >= startPoint.y && event.getY(0) <= endPoint.y) {
-                    handler.removeCallbacks(initTask);
-                    isMoving = true;
-                    if (onIndicatorDragListener != null)
-                        onIndicatorDragListener.onDragStarted(event.getX(), event.getY());
-                    return true;
-                }
-                break;
-
-            case MotionEvent.ACTION_MOVE:
-                if (isMoving) {
-                    if (startPoint.x != event.getX(0)) {
-                        startPoint.x = event.getX(0);
-                        endPoint.x = event.getX(0);
-                        if (onIndicatorDragListener != null)
-                            onIndicatorDragListener.onDragging(event.getX(), event.getY());
-                        invalidate();
-                        return true;
-                    }
-                }
-                break;
-
-            case MotionEvent.ACTION_UP:
-                isMoving = false;
-                invalidate();
-                isRestoring = true;
-                if (onIndicatorDragListener != null)
-                    onIndicatorDragListener.onDragFinished(event.getX(), event.getY());
-                handler.postDelayed(initTask, indicatorRestoreTime);
-                return true;
-        }
-        return false;
-    }
-
+    /**
+     * 设置view初始指标所处时间点
+     *
+     * @param hour 所处小时
+     * @param min  所处分钟
+     */
     public void setTime(int hour, int min) {
         this.hour = hour;
         this.min = min;
@@ -275,6 +315,11 @@ public class TimeScrollerIndicatorView extends View {
         invalidate();
     }
 
+    /**
+     * 设置指标根据设定间隔走设定距离
+     *
+     * @param onClock 开关
+     */
     public void setOnClock(boolean onClock) {
         isOnClock = onClock;
         handler.removeCallbacks(onClockTask);
@@ -294,16 +339,51 @@ public class TimeScrollerIndicatorView extends View {
         }
     }
 
+    /**
+     * 设置全局画布圆角大小
+     *
+     * @param canvasBorder 圆角大小
+     */
     public void setCanvasBorder(float canvasBorder) {
         this.canvasBorder = canvasBorder;
     }
 
+    /**
+     * 设置指标拖动监听器
+     *
+     * @param onIndicatorDragListener 指标拖动监听器
+     */
     public void setOnIndicatorDragListener(TimeScrollerIndicatorView.onIndicatorDragListener onIndicatorDragListener) {
         this.onIndicatorDragListener = onIndicatorDragListener;
     }
 
-    public interface onClockTickingListener {
-        void onClockTicking(float x);
+    /**
+     * 指标拖动监听器
+     */
+    public interface onIndicatorDragListener {
+        /**
+         * 拖拽开始时
+         *
+         * @param x x轴坐标
+         * @param y y轴坐标
+         */
+        void onDragStarted(float x, float y);
+
+        /**
+         * 拖拽中
+         *
+         * @param x x轴坐标
+         * @param y y轴坐标
+         */
+        void onDragging(float x, float y);
+
+        /**
+         * 拖拽结束时
+         *
+         * @param x x轴坐标
+         * @param y y轴坐标
+         */
+        void onDragFinished(float x, float y);
     }
 
     /**
@@ -316,12 +396,16 @@ public class TimeScrollerIndicatorView extends View {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
     }
 
-    public interface onIndicatorDragListener {
-        void onDragStarted(float x, float y);
-
-        void onDragging(float x, float y);
-
-        void onDragFinished(float x, float y);
+    /**
+     * 指标根据设定间隔移动设定距离监听器
+     */
+    public interface onClockTickingListener {
+        /**
+         * 开启后 自动移动时触发
+         *
+         * @param x x轴坐标
+         */
+        void onClockTicking(float x);
     }
 
 

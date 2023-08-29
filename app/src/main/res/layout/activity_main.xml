@@ -22,12 +22,12 @@
             app:TimeScrollerView_rect_color="#242847"
             app:TimeScrollerView_scroller_corner_radius="0dp" />
 
-        <com.ma.timescrollerview.TimeScrollerIndicatorView
-            android:id="@+id/indicator"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            app:TimeScrollerIndicatorView_indicator_color="@color/teal_200"
-            app:TimeScrollerIndicatorView_stroke_width="4dp" />
+        <!--        <com.ma.timescrollerview.TimeScrollerIndicatorView-->
+        <!--            android:id="@+id/indicator"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="80dp"-->
+        <!--            app:TimeScrollerIndicatorView_indicator_color="@color/teal_200"-->
+        <!--            app:TimeScrollerIndicatorView_stroke_width="4dp" />-->
 
         <com.ma.timescrollerview.TimeScroller
             android:layout_width="match_parent"
