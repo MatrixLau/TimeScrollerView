@@ -229,8 +229,16 @@ public class TimeScrollerIndicatorView extends View {
                     if (startPoint.x != event.getX(0)) {
                         startPoint.x = event.getX(0);
                         endPoint.x = event.getX(0);
+                        //避免出界
+                        if (startPoint.x < getPaddingLeft()) {
+                            startPoint.x = getPaddingLeft();
+                            endPoint.x = getPaddingLeft();
+                        } else if (startPoint.x > getWidth() - getPaddingRight()) {
+                            startPoint.x = getWidth() - getPaddingRight();
+                            endPoint.x = getWidth() - getPaddingRight();
+                        }
                         if (onIndicatorDragListener != null)
-                            onIndicatorDragListener.onDragging(event.getX(), event.getY());
+                            onIndicatorDragListener.onDragging(startPoint.x, event.getY());
                         invalidate();
                         return true;
                     }
@@ -242,8 +250,15 @@ public class TimeScrollerIndicatorView extends View {
                 isRestoring = true;
                 handler.postDelayed(initTask, indicatorRestoreTime);
                 invalidate();
+                float x = event.getX(0);
+                //避免出界
+                if (x < getPaddingLeft()) {
+                    x = getPaddingLeft();
+                } else if (x > getWidth() - getPaddingRight()) {
+                    x = getWidth() - getPaddingRight();
+                }
                 if (onIndicatorDragListener != null)
-                    onIndicatorDragListener.onDragFinished(event.getX(), event.getY());
+                    onIndicatorDragListener.onDragFinished(x, event.getY());
                 return true;
         }
         return false;

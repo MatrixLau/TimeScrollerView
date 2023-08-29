@@ -1,6 +1,7 @@
 package com.ma.timescrollerview;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,26 +18,26 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         TimeScrollerView timeScrollerView = findViewById(R.id.timeScroller);
-//        TimeScrollerIndicatorView timeScrollerIndicatorView = findViewById(R.id.indicator);
-//        timeScrollerIndicatorView.setCanvasBorder(timeScrollerView.getCornerRadius());
-//        timeScrollerIndicatorView.setOnClock(true);
-//
-//        timeScrollerIndicatorView.setOnIndicatorDragListener(new TimeScrollerIndicatorView.onIndicatorDragListener() {
-//            @Override
-//            public void onDragStarted(float x, float y) {
-//
-//            }
-//
-//            @Override
-//            public void onDragging(float x, float y) {
-////                Log.e(TAG, "onDragging: x="+x+" y="+y);
-//            }
-//
-//            @Override
-//            public void onDragFinished(float x, float y) {
-//                Log.e(TAG, "onDragFinished: x=" + x + " y=" + y);
-//            }
-//        });
+        TimeScrollerIndicatorView timeScrollerIndicatorView = findViewById(R.id.indicator);
+        timeScrollerIndicatorView.setCanvasBorder(timeScrollerView.getCornerRadius());
+        timeScrollerIndicatorView.setOnClock(true);
+
+        timeScrollerIndicatorView.setOnIndicatorDragListener(new TimeScrollerIndicatorView.onIndicatorDragListener() {
+            @Override
+            public void onDragStarted(float x, float y) {
+
+            }
+
+            @Override
+            public void onDragging(float x, float y) {
+//                Log.e(TAG, "onDragging: x="+x+" y="+y);
+            }
+
+            @Override
+            public void onDragFinished(float x, float y) {
+                Log.e(TAG, "onDragFinished: x=" + x + " y=" + y);
+            }
+        });
 
 //        Button timeSectionButton = findViewById(R.id.timeSectionButton);
 //        timeSectionButton.setOnClickListener(new View.OnClickListener() {
