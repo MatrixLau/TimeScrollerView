@@ -10,6 +10,9 @@ public class TimeScroller extends RelativeLayout {
 
     private String TAG = getClass().getSimpleName();
 
+    public TimeScrollerView timeScrollerView;
+    public TimeScrollerIndicatorView timeScrollerIndicatorView;
+
     public TimeScroller(Context context) {
         super(context);
         init();
@@ -31,8 +34,8 @@ public class TimeScroller extends RelativeLayout {
     }
 
     public void init(AttributeSet attrs) {
-        TimeScrollerView timeScrollerView = new TimeScrollerView(getContext(), attrs);
-        TimeScrollerIndicatorView timeScrollerIndicatorView = new TimeScrollerIndicatorView(getContext(), attrs);
+        timeScrollerView = new TimeScrollerView(getContext(), attrs);
+        timeScrollerIndicatorView = new TimeScrollerIndicatorView(getContext(), attrs);
 
         addView(timeScrollerView);
         timeScrollerIndicatorView.setCanvasBorder(timeScrollerView.getCornerRadius());
@@ -50,27 +53,34 @@ public class TimeScroller extends RelativeLayout {
             @Override
             public void onDragFinished(float x, float y) {
                 Log.e(TAG, "onDragFinished: x=" + x + " y=" + y);
-                Log.e(TAG, "onDragFinished: index:" + timeScrollerView.getStartTimeSectionFromCoordinate(x));
+                int index = timeScrollerView.getStartTimeSectionFromCoordinate(x);
+                Log.e(TAG, "onDragFinished: index:" + index);
+                if (index != -1) {
+                    Log.e(TAG, "onDragFinished: time:" + timeScrollerView.getTimeScrollerData().getData().get(index - 1) + " - " + timeScrollerView.getTimeScrollerData().getData().get(index));
+
+                }
             }
         });
-        timeScrollerIndicatorView.setOnClockTickingListener(new TimeScrollerIndicatorView.onClockTickingListener() {
-            @Override
-            public void onClockTicking(float x) {
-                Log.w(TAG, "onClockTicking: x=" + x);
-                Log.w(TAG, "onClockTicking: currentSectionIndex=" + timeScrollerView.getStartTimeSectionFromCoordinate(x));
-            }
-        });
+//        timeScrollerIndicatorView.setOnClockTickingListener(new TimeScrollerIndicatorView.onClockTickingListener() {
+//            @Override
+//            public void onClockTicking(float x) {
+//                Log.w(TAG, "onClockTicking: x=" + x);
+//                Log.w(TAG, "onClockTicking: currentSectionIndex=" + timeScrollerView.getStartTimeSectionFromCoordinate(x));
+//            }
+//        });
         timeScrollerIndicatorView.setOnClock(true);
         addView(timeScrollerIndicatorView);
     }
 
     public void init() {
-        TimeScrollerView timeScrollerView = new TimeScrollerView(getContext());
-        TimeScrollerIndicatorView timeScrollerIndicatorView = new TimeScrollerIndicatorView(getContext());
+        timeScrollerView = new TimeScrollerView(getContext());
+        timeScrollerIndicatorView = new TimeScrollerIndicatorView(getContext());
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         return super.onInterceptTouchEvent(ev);
     }
+
+
 }

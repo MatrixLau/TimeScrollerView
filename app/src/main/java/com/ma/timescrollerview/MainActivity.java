@@ -2,6 +2,8 @@ package com.ma.timescrollerview;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -60,5 +62,21 @@ public class MainActivity extends AppCompatActivity {
 //                Log.i(TAG, "onClick: TimeSectionCount=" + timeSectionCount + " TimeSectionStartPosition=" + timeSectionStartPositionCount);
 //            }
 //        });
+        Button timeSectionStartPositionButton = findViewById(R.id.onClockButton);
+        timeSectionStartPositionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                timeScrollerIndicatorView.setOnClock(!timeScrollerIndicatorView.isOnClock());
+            }
+        });
+
+        TimeScroller timeScroller = findViewById(R.id.timeScroller_whole);
+        timeScroller.timeScrollerIndicatorView.setOnClockTickingListener(new TimeScrollerIndicatorView.onClockTickingListener() {
+            @Override
+            public void onClockTicking(float x) {
+                Log.w(TAG, "onClockTicking: x=" + x);
+                Log.w(TAG, "onClockTicking: currentSectionIndex=" + timeScroller.timeScrollerView.getStartTimeSectionFromCoordinate(x));
+            }
+        });
     }
 }

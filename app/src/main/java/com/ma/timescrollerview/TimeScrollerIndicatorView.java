@@ -26,7 +26,7 @@ public class TimeScrollerIndicatorView extends View {
     private int indicatorColor = Color.BLUE;
     private float indicatorStrokeWidth = getDp(10);
     private float widthPerMin = 0f;
-    private int hour = 10;
+    private int hour = 11;
     private int min = 28;
     private PointF startPoint = new PointF();
     private PointF endPoint = new PointF();
@@ -117,6 +117,8 @@ public class TimeScrollerIndicatorView extends View {
                 float distance = 0f;
                 float targetPosX = paddingLeft + additionWidth;
                 float restorePosX = paddingLeft + additionWidthRestore;
+                //防止23:59跳转到0:00 onClockTicking监听器显示返回路径
+                if (startPoint.x > targetPosX && hour == 0 && min == 0) isRestoring = true;
                 if (startPoint.x > targetPosX) {  //后退
                     distance = startPoint.x - targetPosX;
 //                    Log.e(TAG, "onDraw: distance="+distance);
@@ -127,7 +129,7 @@ public class TimeScrollerIndicatorView extends View {
                         endPoint.x = targetPosX;
                     } else if (startPoint.x > targetPosX && startPoint.x <= restorePosX) {
                         if (isRestoring) {
-                            Log.e(TAG, "initTask: Restored");
+                            Log.e(TAG, "init: Restored");
                             handler.removeCallbacks(initTask);
                             isRestoring = false;
                         }
@@ -145,7 +147,7 @@ public class TimeScrollerIndicatorView extends View {
                         endPoint.x = targetPosX;
                     } else if (startPoint.x < targetPosX && startPoint.x >= restorePosX) {
                         if (isRestoring) {
-                            Log.e(TAG, "initTask: Restored");
+                            Log.e(TAG, "init: Restored");
                             handler.removeCallbacks(initTask);
                             isRestoring = false;
                         }
@@ -352,6 +354,10 @@ public class TimeScrollerIndicatorView extends View {
                 invalidate();
             }
         }
+    }
+
+    public boolean isOnClock() {
+        return isOnClock;
     }
 
     /**

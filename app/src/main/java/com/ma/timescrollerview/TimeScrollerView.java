@@ -366,6 +366,10 @@ public class TimeScrollerView extends View {
         return -1;
     }
 
+    public TimeScrollerData getTimeScrollerData() {
+        return timeScrollerData;
+    }
+
     /**
      * 获取统一化像素大小
      *
@@ -436,9 +440,6 @@ class TimeScrollerSection {
 
     @Override
     public String toString() {
-        return "TimeScrollerSection{" +
-                "hour='" + hour + '\'' +
-                ", min='" + min + '\'' +
-                '}';
+        return hour + ":" + min;
     }
 }
