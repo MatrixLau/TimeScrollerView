@@ -214,6 +214,9 @@ public class TimeScrollerIndicatorView extends View {
     public boolean onTouchEvent(MotionEvent event) {
 //        Log.w(TAG, "onTouchEvent: " + event.toString());
 
+        //屏蔽父级触摸事件
+        getParent().requestDisallowInterceptTouchEvent(true);
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if (event.getX(0) >= startPoint.x - 3 * indicatorStrokeWidth / 2f && event.getX(0) <= startPoint.x + 3 * indicatorStrokeWidth / 2f
